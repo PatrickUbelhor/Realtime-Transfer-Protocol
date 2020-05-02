@@ -29,6 +29,7 @@ from Feedback import Feedback
 #  |                               Payload                               |
 #  -----------------------------------------------------------------------
 
+MIN_PERIOD = 20
 period = 20  # In milliseconds
 
 
@@ -101,6 +102,8 @@ def main(args):
 	SERVER_IP = args[1]
 	SERVER_RTP_PORT = int(args[2])
 	SERVER_RTCP_PORT = SERVER_RTP_PORT + 1
+	global MIN_PERIOD
+	global period
 
 	init_seq_num, rtcp_socket = init_connection(SERVER_IP, SERVER_RTCP_PORT)
 	rtp_thread = threading.Thread(target=send_video, args=(SERVER_IP, SERVER_RTP_PORT, init_seq_num))
@@ -109,6 +112,13 @@ def main(args):
 	# while true, receive rtcp. if message == 'terminated', stop
 	while True:
 		feedback = read_rtcp_packet(rtcp_socket)
+
+		# Adjust packet frequency to maximize quality of stream
+		if feedback.rate_packet_loss > 0.1:
+			period += 2
+		else:
+			period = max(period - 1, MIN_PERIOD)
+
 		print("Packet loss rate: ", feedback.rate_packet_loss)
 		print("Packet late rate: ", feedback.rate_packet_late)
 		print("---------------------------")
