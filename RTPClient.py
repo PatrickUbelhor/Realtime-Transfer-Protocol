@@ -45,7 +45,7 @@ def init_connection(address, port):
 
 def get_image(capture):
 	result0, raw = capture.read()
-	result1, jpg = cv2.imencode('.jpg', raw, [int(cv2.IMWRITE_JPEG_QUALITY), 50])
+	result1, jpg = cv2.imencode('.jpg', raw, [int(cv2.IMWRITE_JPEG_QUALITY), 25])
 	cv2.imshow('Client', raw)
 	cv2.waitKey(1)
 
